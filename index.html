@@ -1,0 +1,2762 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>炉石项目集 · 硬件项目全景</title>
+<style>
+  :root {
+    --bg: #f0f2f5;
+    --card: #ffffff;
+    --primary: #1a73e8;
+    --text: #1f2937;
+    --text-secondary: #6b7280;
+    --border: #e5e7eb;
+    --green: #10b981;
+    --green-bg: #ecfdf5;
+    --red: #ef4444;
+    --red-bg: #fef2f2;
+    --orange: #f59e0b;
+    --orange-bg: #fffbeb;
+    --purple: #8b5cf6;
+    --purple-bg: #f5f3ff;
+    --gray: #9ca3af;
+    --gray-bg: #f3f4f6;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .header {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8e 50%, #1a73e8 100%);
+    color: white;
+    padding: 32px 40px 28px;
+  }
+  .header h1 { font-size: 24px; font-weight: 700; margin-bottom: 4px; letter-spacing: 2px; }
+  .header .subtitle { font-size: 14px; opacity: 0.85; letter-spacing: 1px; }
+  .header .meta { font-size: 12px; opacity: 0.7; margin-top: 8px; letter-spacing: 0.5px; }
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    padding: 0 40px;
+    margin-top: -24px;
+  }
+  .stat-card {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 18px 16px 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.05);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 3px solid transparent;
+  }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .stat-card.total::before { background: linear-gradient(90deg, #1a73e8, #4fc3f7); }
+  .stat-card.normal::before { background: linear-gradient(90deg, #10b981, #6ee7b7); }
+  .stat-card.risk::before { background: linear-gradient(90deg, #ef4444, #fca5a5); }
+  .stat-card.paused::before { background: linear-gradient(90deg, #f59e0b, #fcd34d); }
+  .stat-card.done::before { background: linear-gradient(90deg, #9ca3af, #d1d5db); }
+  .stat-card.nostatus::before { background: linear-gradient(90deg, #8b5cf6, #c4b5fd); }
+  .stat-card.total { background: linear-gradient(135deg, #eff6ff, #dbeafe); }
+  .stat-card.normal { background: linear-gradient(135deg, #ecfdf5, #d1fae5); }
+  .stat-card.risk { background: linear-gradient(135deg, #fef2f2, #fee2e2); }
+  .stat-card.paused { background: linear-gradient(135deg, #fffbeb, #fef3c7); }
+  .stat-card.done { background: linear-gradient(135deg, #f9fafb, #f3f4f6); }
+  .stat-card.nostatus { background: linear-gradient(135deg, #f5f3ff, #ede9fe); }
+  .stat-click { cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; position: relative; overflow: hidden; }
+  .stat-click::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -75%;
+    width: 50%; height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.6), transparent);
+    transform: skewX(-20deg);
+  }
+  .stat-click:hover::after { left: 125%; transition: left 0.5s ease; }
+  .stat-click:hover { transform: translateY(-6px); box-shadow: 0 12px 28px rgba(0,0,0,0.14); }
+  .stat-card .num { font-size: 30px; font-weight: 700; line-height: 1.2; }
+  .stat-card .pct { font-size: 13px; font-weight: 600; opacity: 0.6; }
+  .stat-card .label { font-size: 12px; color: #374151; margin-top: 4px; font-weight: 500; }
+  .stat-card.total .num { color: var(--primary); }
+  .stat-card.risk .num { color: var(--red); }
+  .stat-card.done .num { color: var(--gray); }
+  .stat-card.normal .num { color: var(--green); }
+  .stat-card.paused .num { color: #d97706; }
+  .toolbar {
+    padding: 22px 40px 14px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .year-tabs {
+    padding: 0 40px 14px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .year-tab {
+    padding: 6px 16px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+  }
+  .year-tab:hover { border-color: var(--primary); color: var(--primary); }
+  .year-tab.active { background: #3730a3; color: white; border-color: #3730a3; }
+  .year-tab .cnt { font-size: 11px; opacity: 0.7; margin-left: 4px; }
+  .search-box {
+    flex: 1;
+    min-width: 200px;
+    padding: 9px 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s;
+  }
+  .search-box:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,115,232,0.1); }
+  .filter-btn {
+    padding: 7px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card);
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+  }
+  .filter-btn:hover { border-color: var(--primary); color: var(--primary); }
+  .filter-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+  .table-container {
+    margin: 0 40px 40px;
+    background: var(--card);
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04);
+    overflow: auto;
+    border: 1px solid #f0f1f3;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    background: #fafbfc;
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    color: #4b5563;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    border-bottom: 1px solid #eef0f3;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  tbody td {
+    padding: 7px 16px;
+    border-bottom: 1px solid #f5f6f8;
+    font-size: 13px;
+    vertical-align: middle;
+  }
+  tbody tr { transition: background 0.12s; }
+  tbody tr.proj-row:nth-child(odd) { background: #f0f5ff; }
+  tbody tr.proj-row:hover { background: #dbeafe !important; box-shadow: inset 3px 0 0 #3b82f6; }
+  tbody tr:last-child td { border-bottom: none; }
+  .badge {
+    display: inline-flex;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .badge-normal { background: var(--green-bg); color: var(--green); }
+  .badge-risk { background: var(--red-bg); color: var(--red); }
+  .badge-delay { background: var(--orange-bg); color: var(--orange); }
+  .badge-done { background: var(--gray-bg); color: var(--gray); }
+  .badge-pause { background: #fef3c7; color: #d97706; }
+  .badge-stall { background: #fef3c7; color: #d97706; }
+  .badge-none { background: var(--purple-bg); color: var(--purple); }
+  .ms-name {
+    max-width: 260px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+  }
+  .ms-date { font-variant-numeric: tabular-nums; color: var(--text-secondary); font-size: 13px; }
+  .ms-overdue { color: var(--red); font-weight: 600; }
+  .ms-soon { color: var(--orange); font-weight: 600; }
+  .ms-none-text { color: #d1d5db; }
+  .proj-name { font-weight: 500; }
+  .proj-row { cursor: pointer; }
+  .proj-link { color: inherit; text-decoration: none; }
+  .proj-link:hover { color: #1a73e8; text-decoration: underline; }
+  .year-row td {
+    background: linear-gradient(90deg, #eef2ff, #e0e7ff);
+    font-weight: 700;
+    font-size: 14px;
+    color: #4338ca;
+    padding: 10px 16px;
+    border-bottom: 2px solid #c7d2fe;
+    position: sticky;
+    top: 41px;
+    z-index: 0;
+  }
+  .year-row .year-count { font-weight: 400; font-size: 12px; color: #6366f1; margin-left: 8px; }
+  .owner-row td {
+    background: #f8fafc;
+    font-weight: 600;
+    font-size: 13px;
+    color: #475569;
+    padding: 6px 16px 6px 32px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .owner-row .owner-count { font-weight: 400; font-size: 11px; color: #94a3b8; margin-left: 6px; }
+  .tooltip {
+    display: none;
+    position: fixed;
+    background: #eff6ff;
+    color: #1e3a5f;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    max-width: 360px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    border: 1px solid #bfdbfe;
+    z-index: 9999;
+    pointer-events: none;
+    line-height: 1.8;
+  }
+  .tooltip .tt-title { font-weight: 700; margin-bottom: 6px; color: #1a73e8; }
+  .tooltip .tt-item { display: flex; justify-content: space-between; gap: 16px; }
+  .tooltip .tt-done { opacity: 0.5; text-decoration: line-through; }
+  .tooltip .tt-date { color: #64748b; font-variant-numeric: tabular-nums; }
+  @media (max-width: 768px) {
+    .header { padding: 20px 16px 16px; }
+    .header h1 { font-size: 18px; }
+    .header .subtitle { font-size: 12px; }
+    .stats-row { grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 0 12px; margin-top: -16px; }
+    .stat-card { padding: 12px 8px 10px; border-radius: 10px; }
+    .toolbar { flex-wrap: wrap; padding: 12px; gap: 8px; }
+    .toolbar .search-box { width: 100%; }
+    .filter-btn { padding: 6px 12px; font-size: 12px; }
+    .year-tabs { padding: 0 12px; overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+    .year-tab { flex-shrink: 0; padding: 6px 14px; font-size: 13px; }
+    .table-container { margin: 0 8px 20px; }
+    table { font-size: 12px; min-width: 700px; }
+    th, td { padding: 8px 6px; }
+    .tooltip { max-width: 260px; font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>炉石项目集 · 硬件项目全景</h1>
+  <div class="subtitle">按创建年份倒序分组</div>
+  <div class="meta">数据更新：2026-09-26</div>
+</div>
+
+<div class="stats-row" id="statsRow"></div>
+
+<div class="toolbar">
+  <div style="position:relative;flex:1;min-width:200px">
+    <input class="search-box" id="searchBox" placeholder="搜索项目名称、里程碑、负责人…" style="width:100%;padding-right:32px">
+    <span id="searchClear" style="display:none;position:absolute;right:10px;top:50%;transform:translateY(-50%);cursor:pointer;color:#9ca3af;font-size:16px;line-height:1;padding:4px" onclick="document.getElementById('searchBox').value='';applyFilter();this.style.display='none'">&times;</span>
+  </div>
+  <button class="filter-btn active" data-filter="all">全部</button>
+  <button class="filter-btn" data-filter="normal">进度正常</button>
+  <button class="filter-btn" data-filter="risk">风险/延误</button>
+  <button class="filter-btn" data-filter="paused">暂停/停滞</button>
+  <button class="filter-btn" data-filter="done">已完结</button>
+  <button class="filter-btn" data-filter="nostatus">未设置状态</button>
+</div>
+
+<div class="year-tabs" id="yearTabs"></div>
+
+<div class="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th style="width:40px">#</th>
+        <th data-sort="name">项目名称</th>
+        <th data-sort="status">项目状态</th>
+        <th data-sort="statusDesc">状态描述</th>
+        <th data-sort="curMsName">当前里程碑</th>
+        <th data-sort="curMs">时间</th>
+        <th data-sort="nextMsName">下个里程碑</th>
+        <th data-sort="nextMs">时间</th>
+        <th data-sort="owner">项目经理</th>
+        <th data-sort="created">创建时间</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</div>
+
+<div class="tooltip" id="rowTooltip"></div>
+<script>
+const projects = [
+  {
+    "id": "6aac87c1f754000531de3932",
+    "name": "B-赛力斯-RT3遥控器海外版",
+    "created": "2026-09-18T00:37:21.493Z",
+    "statusName": "暂无状态",
+    "owner": "郑雯遐",
+    "milestones": [],
+    "statusDesc": ""
+  },
+  {
+    "id": "6aaa34cf8a90111ad46b4ea1",
+    "name": "H-U13海外双支麦克风",
+    "created": "2026-09-16T06:18:55.631Z",
+    "statusName": "暂无状态",
+    "owner": "黄成东",
+    "milestones": [
+      {
+        "c": "完成定标",
+        "d": "2026-02-09",
+        "done": true
+      },
+      {
+        "c": "DVT试产物料齐套",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "DVT准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "PVT准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "MP物料齐套",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "产品立项会议",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "项目交付&MP准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "ID FIX",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "EVT试产物料齐套",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "EVT准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "PVT试产物料齐套",
+        "d": "",
+        "done": false
+      }
+    ],
+    "statusDesc": ""
+  },
+  {
+    "id": "6aaa0ac13ae8b44876af9c92",
+    "name": "B-乾崑-华为座舱U8Pro",
+    "created": "2026-09-16T03:19:29.823Z",
+    "statusName": "暂无状态",
+    "owner": "郑雯遐",
+    "milestones": [],
+    "statusDesc": ""
+  },
+  {
+    "id": "6aaa0a996cb8d6136c644a6d",
+    "name": "B-乾崑-遥控器",
+    "created": "2026-09-16T03:18:49.047Z",
+    "statusName": "暂无状态",
+    "owner": "郑雯遐",
+    "milestones": [],
+    "statusDesc": ""
+  },
+  {
+    "id": "6aaa0a6c6cb8d6136c644a69",
+    "name": "B-猛士-灵动旋钮",
+    "created": "2026-09-16T03:18:04.704Z",
+    "statusName": "暂无状态",
+    "owner": "郑雯遐",
+    "milestones": [],
+    "statusDesc": ""
+  },
+  {
+    "id": "6aaa0a453ae8b44876af9c8e",
+    "name": "B-奕境-遥控器",
+    "created": "2026-09-16T03:17:25.765Z",
+    "statusName": "暂无状态",
+    "owner": "郑雯遐",
+    "milestones": [],
+    "statusDesc": ""
+  },
+  {
+    "id": "6aaa0a1a7277b58c55e1694c",
+    "name": "B-奕境-灵动旋钮",
+    "created": "2026-09-16T03:16:42.372Z",
+    "statusName": "暂无状态",
+    "owner": "郑雯遐",
+    "milestones": [],
+    "statusDesc": ""
+  },
+  {
+    "id": "6aaa09e7702bcba476823541",
+    "name": "B-启境-RT3遥控器",
+    "created": "2026-09-16T03:15:51.354Z",
+    "statusName": "暂无状态",
+    "owner": "郑雯遐",
+    "milestones": [],
+    "statusDesc": ""
+  },
+  {
+    "id": "6aaa09ba7277b58c55e16944",
+    "name": "B-启境-灵动旋钮",
+    "created": "2026-09-16T03:15:06.483Z",
+    "statusName": "暂无状态",
+    "owner": "郑雯遐",
+    "milestones": [],
+    "statusDesc": ""
+  },
+  {
+    "id": "6aa38dd96cb8d6136c63f542",
+    "name": "H-TeslsQ1(旅鸫)麦克风",
+    "created": "2026-09-11T05:12:57.291Z",
+    "statusName": "暂无状态",
+    "owner": "黄成东",
+    "milestones": [
+      {
+        "c": "完成定标",
+        "d": "2026-02-09",
+        "done": true
+      },
+      {
+        "c": "DVT试产物料齐套",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "DVT准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "PVT准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "MP物料齐套",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "产品立项会议",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "项目交付&MP准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "ID FIX",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "EVT试产物料齐套",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "EVT准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "PVT试产物料齐套",
+        "d": "",
+        "done": false
+      }
+    ],
+    "statusDesc": ""
+  },
+  {
+    "id": "6a9fec29702bcba47681ab29",
+    "name": "MS1海外版本",
+    "created": "2026-09-08T11:06:17.916Z",
+    "statusName": "暂无状态",
+    "owner": "石瑀",
+    "milestones": [],
+    "statusDesc": ""
+  },
+  {
+    "id": "6a99447713e121404f0551fc",
+    "name": "H-特斯拉灵动开关",
+    "created": "2026-09-03T09:57:11.380Z",
+    "statusName": "暂无状态",
+    "owner": "黄成东",
+    "milestones": [
+      {
+        "c": "完成定标",
+        "d": "2026-02-09",
+        "done": true
+      },
+      {
+        "c": "DVT试产物料齐套",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "DVT准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "PVT准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "MP物料齐套",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "产品立项会议",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "项目交付&MP准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "ID FIX",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "EVT试产物料齐套",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "EVT准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "PVT试产物料齐套",
+        "d": "",
+        "done": false
+      }
+    ],
+    "statusDesc": ""
+  },
+  {
+    "id": "6a913df56cb8d6136c62c679",
+    "name": "Test",
+    "created": "2026-08-28T07:51:17.309Z",
+    "statusName": "进度正常",
+    "owner": "黄成东",
+    "milestones": [
+      {
+        "c": "完成定标",
+        "d": "2026-02-09",
+        "done": true
+      },
+      {
+        "c": "DVT试产物料齐套",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "DVT准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "PVT准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "MP物料齐套",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "产品立项会议",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "项目交付&MP准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "ID FIX",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "EVT试产物料齐套",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "EVT准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "PVT试产物料齐套",
+        "d": "",
+        "done": false
+      }
+    ],
+    "statusDesc": "44"
+  },
+  {
+    "id": "6a8fcacb5b0821fb32006eed",
+    "name": "B-MTK&公版BLE K歌方案",
+    "created": "2026-08-27T05:27:39.967Z",
+    "statusName": "暂无状态",
+    "owner": "黄成东",
+    "milestones": [
+      {
+        "c": "完成定标",
+        "d": "2026-02-09",
+        "done": true
+      },
+      {
+        "c": "产品立项会议",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "项目交付&MP准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "DVT试产物料齐套",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "DVT准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "PVT准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "MP物料齐套",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "ID FIX",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "EVT试产物料齐套",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "EVT准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "PVT试产物料齐套",
+        "d": "",
+        "done": false
+      }
+    ],
+    "statusDesc": ""
+  },
+  {
+    "id": "6a8e8f837ae5ad1ec4ef36be",
+    "name": "B-海尔-RT4K遥控器",
+    "created": "2026-08-26T07:02:27.694Z",
+    "statusName": "暂无状态",
+    "owner": "郑雯遐",
+    "milestones": [],
+    "statusDesc": ""
+  },
+  {
+    "id": "6a8d3db65b0821fb32004743",
+    "name": "B-灵动屏Lite",
+    "created": "2026-08-25T07:01:10.823Z",
+    "statusName": "暂无状态",
+    "owner": "黄成东",
+    "milestones": [
+      {
+        "c": "完成定标",
+        "d": "2026-02-09",
+        "done": true
+      },
+      {
+        "c": "产品立项会议",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "项目交付&MP准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "DVT试产物料齐套",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "DVT准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "PVT准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "MP物料齐套",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "ID FIX",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "EVT试产物料齐套",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "EVT准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "PVT试产物料齐套",
+        "d": "",
+        "done": false
+      }
+    ],
+    "statusDesc": ""
+  },
+  {
+    "id": "6a86e071c41c37563c7d0136",
+    "name": "B-长城- 灵动旋钮海外版",
+    "created": "2026-08-20T11:09:37.739Z",
+    "statusName": "暂无状态",
+    "owner": "郑雯遐",
+    "milestones": [],
+    "statusDesc": ""
+  },
+  {
+    "id": "6a858127c41c37563c7ce91d",
+    "name": "特斯拉U13",
+    "created": "2026-08-19T10:10:47.829Z",
+    "statusName": "暂无状态",
+    "owner": "李潘婷",
+    "milestones": [
+      {
+        "c": "完成定标",
+        "d": "2026-02-09",
+        "done": true
+      },
+      {
+        "c": "产品立项会议",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "项目交付&MP准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "ID FIX",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "EVT试产物料齐套",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "EVT准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "PVT试产物料齐套",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "DVT试产物料齐套",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "DVT准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "PVT准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "MP物料齐套",
+        "d": "",
+        "done": false
+      }
+    ],
+    "statusDesc": ""
+  },
+  {
+    "id": "6a704ccaf754000531daa25d",
+    "name": "H-特斯拉-灵动开关",
+    "created": "2026-08-03T08:09:46.445Z",
+    "statusName": "暂无状态",
+    "owner": "万启林",
+    "milestones": [],
+    "statusDesc": ""
+  },
+  {
+    "id": "6a6ffa10da52ff7214c20db6",
+    "name": "B-长安海外-Q1",
+    "created": "2026-08-03T02:16:48.817Z",
+    "statusName": "暂无状态",
+    "owner": "郑雯遐",
+    "milestones": [],
+    "statusDesc": ""
+  },
+  {
+    "id": "6a6abe30f367e8c8a5f4b9d5",
+    "name": "B-理想-灵动旋钮",
+    "created": "2026-07-30T03:00:00.853Z",
+    "statusName": "暂无状态",
+    "owner": "黄成东",
+    "milestones": [
+      {
+        "c": "完成定标",
+        "d": "2026-02-09",
+        "done": true
+      },
+      {
+        "c": "产品立项会议",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "项目交付&MP准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "DVT试产物料齐套",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "DVT准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "PVT准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "MP物料齐套",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "ID FIX",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "EVT试产物料齐套",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "EVT准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "PVT试产物料齐套",
+        "d": "",
+        "done": false
+      }
+    ],
+    "statusDesc": ""
+  },
+  {
+    "id": "6a5ec5015b0821fb32fd8adc",
+    "name": "B-MorrorArt-Q1 2.4G",
+    "created": "2026-07-21T01:01:53.576Z",
+    "statusName": "项目完结",
+    "owner": "郑雯遐",
+    "milestones": [],
+    "statusDesc": "已完结"
+  },
+  {
+    "id": "6a5b3223da52ff7214c0e3b1",
+    "name": "B-方程豹-灵动开关",
+    "created": "2026-07-18T07:58:27.902Z",
+    "statusName": "暂无状态",
+    "owner": "郑雯遐",
+    "milestones": [],
+    "statusDesc": ""
+  },
+  {
+    "id": "6a5b31a47ae5ad1ec4ec4234",
+    "name": "B-腾势-灵动开关",
+    "created": "2026-07-18T07:56:20.292Z",
+    "statusName": "暂无状态",
+    "owner": "郑雯遐",
+    "milestones": [],
+    "statusDesc": ""
+  },
+  {
+    "id": "6a4afbf3c41c37563c794f3c",
+    "name": "B-起亚-U13",
+    "created": "2026-07-06T00:50:59.652Z",
+    "statusName": "项目完结",
+    "owner": "万启林",
+    "milestones": [],
+    "statusDesc": "已完结"
+  },
+  {
+    "id": "6a4afadff367e8c8a5f2b51d",
+    "name": "B-长安-自研遥控器",
+    "created": "2026-07-06T00:46:23.608Z",
+    "statusName": "暂无状态",
+    "owner": "万启林",
+    "milestones": [],
+    "statusDesc": ""
+  },
+  {
+    "id": "6a43bdc3389ccdef3cc70c62",
+    "name": "B-乾崑-灵动开关",
+    "created": "2026-06-30T12:59:47.883Z",
+    "statusName": "暂无状态",
+    "owner": "郑雯遐",
+    "milestones": [],
+    "statusDesc": ""
+  },
+  {
+    "id": "6a3885a47ae5ad1ec4ea07f9",
+    "name": "B-奕境-华为座舱U8Pro",
+    "created": "2026-06-22T00:45:24.911Z",
+    "statusName": "暂无状态",
+    "owner": "郑雯遐",
+    "milestones": [],
+    "statusDesc": ""
+  },
+  {
+    "id": "6a3884f2f754000531d732cf",
+    "name": "B-猛士-华为座舱U8Pro",
+    "created": "2026-06-22T00:42:26.316Z",
+    "statusName": "暂无状态",
+    "owner": "郑雯遐",
+    "milestones": [],
+    "statusDesc": ""
+  },
+  {
+    "id": "6a381664ae5a104f018a0f39",
+    "name": "B-炉石-C1M麦克风",
+    "created": "2026-06-21T16:50:44.306Z",
+    "statusName": "进度正常",
+    "owner": "郑雯遐",
+    "milestones": [
+      {
+        "c": "试产硬件锁板",
+        "d": "2026-07-17",
+        "done": true
+      },
+      {
+        "c": "开模通知",
+        "d": "2026-08-07",
+        "done": true
+      },
+      {
+        "c": "模具T0完成",
+        "d": "2026-08-28",
+        "done": true
+      },
+      {
+        "c": "模具T1完成",
+        "d": "2026-09-11",
+        "done": false
+      },
+      {
+        "c": "DVT组装完成",
+        "d": "2026-09-11",
+        "done": true
+      },
+      {
+        "c": "硬件封版",
+        "d": "2026-09-18",
+        "done": false
+      },
+      {
+        "c": "认证完成",
+        "d": "2026-09-30",
+        "done": false
+      },
+      {
+        "c": "PVT组装完成",
+        "d": "2026-10-16",
+        "done": false
+      }
+    ],
+    "statusDesc": "0729 C1麦克风周会\n日程主题：低价麦克风C1项目周会\n时间：7月29日 周三 16:15 - 17:15 (GMT+8)\n组织者：万启林\n\n1. 网罩环是放到网罩供应商做、还是放到管体供应商做\n网罩供应商优势：成本低、网罩环不用从模厂寄到网罩厂\n\n考虑风险点\n    a. 网罩环和管体之间的周围断差是否会偏，导致断差不均匀\n    i. 将网罩环的直径增大，稍微偏差目视不明显可以接受；网罩环和管体的断差误差要求：0.12mm\n    b. 网罩环和管体之间的色差\n    c. 螺纹是否会有偏差，螺纹松紧度\n\n结论：成本优先"
+  },
+  {
+    "id": "6a26708d389ccdef3cc56352",
+    "name": "变更事项跟进",
+    "created": "2026-06-08T07:34:37.850Z",
+    "statusName": "暂无状态",
+    "owner": "万启林",
+    "milestones": [],
+    "statusDesc": ""
+  },
+  {
+    "id": "6a1d6492702bcba47679e653",
+    "name": "B-问界-灵动开关3.0",
+    "created": "2026-06-01T10:53:06.177Z",
+    "statusName": "暂无状态",
+    "owner": "黄成东",
+    "milestones": [
+      {
+        "c": "开模指令",
+        "d": "2026-07-06",
+        "done": false
+      },
+      {
+        "c": "DEMO功能演示版本",
+        "d": "2026-07-24",
+        "done": false
+      },
+      {
+        "c": "模具T0完成",
+        "d": "2026-08-03",
+        "done": false
+      },
+      {
+        "c": "全功能版本提测",
+        "d": "2026-08-18",
+        "done": false
+      },
+      {
+        "c": "模具开模沟通",
+        "d": "2026-08-21",
+        "done": false
+      },
+      {
+        "c": "DVT组装完成",
+        "d": "2026-09-02",
+        "done": false
+      },
+      {
+        "c": "华为License发放",
+        "d": "2026-09-21",
+        "done": false
+      },
+      {
+        "c": "软件封版",
+        "d": "2026-09-21",
+        "done": false
+      },
+      {
+        "c": "PVT组装完成",
+        "d": "2026-10-16",
+        "done": false
+      }
+    ],
+    "statusDesc": ""
+  },
+  {
+    "id": "6a196c977ae5ad1ec4e845aa",
+    "name": "B-启境-U8Pro(华为座舱)",
+    "created": "2026-05-29T10:38:15.285Z",
+    "statusName": "项目暂停",
+    "owner": "万启林",
+    "milestones": [],
+    "statusDesc": "后续出乾崑U8Pro，项目暂停"
+  },
+  {
+    "id": "6a185658068f4cbde44d256a",
+    "name": "长城魔术旋钮",
+    "created": "2026-05-28T14:51:04.847Z",
+    "statusName": "项目完结",
+    "owner": "万启林",
+    "milestones": [],
+    "statusDesc": "已完结"
+  },
+  {
+    "id": "6a0d6023389ccdef3cc3c200",
+    "name": "灵动旋钮3.0",
+    "created": "2026-05-20T07:17:55.296Z",
+    "statusName": "暂无状态",
+    "owner": "万启林",
+    "milestones": [
+      {
+        "c": "完成定标",
+        "d": "2026-02-09",
+        "done": true
+      },
+      {
+        "c": "产品立项会议",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "项目交付&MP准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "DVT试产物料齐套",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "DVT准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "PVT准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "ID FIX",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "EVT试产物料齐套",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "EVT准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "PVT试产物料齐套",
+        "d": "",
+        "done": false
+      }
+    ],
+    "statusDesc": ""
+  },
+  {
+    "id": "6a0ade78389ccdef3cc38e56",
+    "name": "B-阿维塔-灵动开关",
+    "created": "2026-05-18T09:40:08.576Z",
+    "statusName": "暂无状态",
+    "owner": "万启林",
+    "milestones": [
+      {
+        "c": "产品立项会议",
+        "d": "2026-05-22",
+        "done": true
+      },
+      {
+        "c": "包材锁定",
+        "d": "2026-06-05",
+        "done": true
+      },
+      {
+        "c": "DV试产完成",
+        "d": "2026-06-23",
+        "done": true
+      },
+      {
+        "c": "客户订单",
+        "d": "2026-07-31",
+        "done": true
+      },
+      {
+        "c": "封样完成",
+        "d": "2026-08-10",
+        "done": false
+      },
+      {
+        "c": "PSW签署完成（纸质）",
+        "d": "2026-08-14",
+        "done": false
+      },
+      {
+        "c": "DV实验完成",
+        "d": "2026-08-26",
+        "done": false
+      },
+      {
+        "c": "PVT交货",
+        "d": "2026-09-07",
+        "done": false
+      }
+    ],
+    "statusDesc": ""
+  },
+  {
+    "id": "69fed96f6cb8d6136c59acd0",
+    "name": "B-岚图-自研车灵动旋钮",
+    "created": "2026-05-09T06:51:27.039Z",
+    "statusName": "暂无状态",
+    "owner": "万启林",
+    "milestones": [
+      {
+        "c": "完成定标",
+        "d": "2026-02-09",
+        "done": true
+      },
+      {
+        "c": "DVT试产物料齐套",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "DVT准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "PVT准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "产品立项会议",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "项目交付&MP准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "PVT试产物料齐套",
+        "d": "",
+        "done": false
+      }
+    ],
+    "statusDesc": ""
+  },
+  {
+    "id": "69e0a545068f4cbde44ad3a4",
+    "name": "C1(低价)麦克风",
+    "created": "2026-04-16T09:00:53.406Z",
+    "statusName": "暂无状态",
+    "owner": "万启林",
+    "milestones": [
+      {
+        "c": "ID FIX",
+        "d": "2026-04-28",
+        "done": true
+      },
+      {
+        "c": "产品立项会议",
+        "d": "2026-05-11",
+        "done": false
+      },
+      {
+        "c": "DVT试产物料齐套",
+        "d": "2026-07-13",
+        "done": false
+      },
+      {
+        "c": "DVT准出评审",
+        "d": "2026-08-11",
+        "done": false
+      },
+      {
+        "c": "PVT准出评审",
+        "d": "2026-08-25",
+        "done": false
+      },
+      {
+        "c": "MP物料齐套",
+        "d": "2026-08-26",
+        "done": false
+      },
+      {
+        "c": "项目交付&MP准出评审",
+        "d": "",
+        "done": false
+      }
+    ],
+    "statusDesc": ""
+  },
+  {
+    "id": "69d71c3a4f887b90bfe02ec3",
+    "name": "B-岚图-U8Pro",
+    "created": "2026-04-09T03:25:46.286Z",
+    "statusName": "暂无状态",
+    "owner": "万启林",
+    "milestones": [
+      {
+        "c": "完成定标",
+        "d": "2026-02-09",
+        "done": true
+      },
+      {
+        "c": "客户订单",
+        "d": "2026-06-05",
+        "done": true
+      },
+      {
+        "c": "7款车调音完毕，并上线到服务器",
+        "d": "2026-06-18",
+        "done": true
+      },
+      {
+        "c": "10套武汉样机发货",
+        "d": "2026-06-25",
+        "done": true
+      },
+      {
+        "c": "6.26发货",
+        "d": "2026-06-26",
+        "done": true
+      }
+    ],
+    "statusDesc": ""
+  },
+  {
+    "id": "69cf9d997ae5ad1ec4e312f5",
+    "name": "海外小甜筒蓝牙版",
+    "created": "2026-04-03T10:59:37.743Z",
+    "statusName": "暂无状态",
+    "owner": "万启林",
+    "milestones": [],
+    "statusDesc": ""
+  },
+  {
+    "id": "69c27a048a90111ad45c9f07",
+    "name": "B-小鹏-蓝牙网关",
+    "created": "2026-03-24T11:48:20.300Z",
+    "statusName": "暂无状态",
+    "owner": "万启林",
+    "milestones": [
+      {
+        "c": "完成定标",
+        "d": "2026-02-09",
+        "done": true
+      },
+      {
+        "c": "产品立项会议",
+        "d": "2026-06-18",
+        "done": true
+      }
+    ],
+    "statusDesc": ""
+  },
+  {
+    "id": "69bce31a5b0821fb32f2932c",
+    "name": "B-炉石-车载机器人",
+    "created": "2026-03-20T06:03:06.820Z",
+    "statusName": "进度正常",
+    "owner": "黄成东",
+    "milestones": [
+      {
+        "c": "完成定标",
+        "d": "2026-02-09",
+        "done": true
+      },
+      {
+        "c": "产品立项会议",
+        "d": "2026-07-31",
+        "done": false
+      },
+      {
+        "c": "ID FIX",
+        "d": "2026-07-31",
+        "done": false
+      },
+      {
+        "c": "EVT试产物料齐套",
+        "d": "2026-08-18",
+        "done": false
+      },
+      {
+        "c": "EVT准出评审",
+        "d": "2026-11-20",
+        "done": false
+      },
+      {
+        "c": "DVT试产物料齐套",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "DVT准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "PVT准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "MP物料齐套",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "项目交付&MP准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "PVT试产物料齐套",
+        "d": "",
+        "done": false
+      }
+    ],
+    "statusDesc": "2、测试测试"
+  },
+  {
+    "id": "69b3a3cec41c37563c6eeb4d",
+    "name": "ai问答机（知之鸟PRO）",
+    "created": "2026-03-13T05:42:38.030Z",
+    "statusName": "暂无状态",
+    "owner": "石瑀",
+    "milestones": [
+      {
+        "c": "完成定标",
+        "d": "2026-03-19",
+        "done": true
+      },
+      {
+        "c": "ID FIX",
+        "d": "2026-03-23",
+        "done": true
+      },
+      {
+        "c": "EVT试产物料齐套",
+        "d": "2026-03-25",
+        "done": true
+      },
+      {
+        "c": "产品立项会议",
+        "d": "2026-04-16",
+        "done": false
+      },
+      {
+        "c": "EVT准出评审",
+        "d": "2026-04-17",
+        "done": false
+      },
+      {
+        "c": "DVT试产物料齐套",
+        "d": "2026-05-12",
+        "done": false
+      },
+      {
+        "c": "DVT准出评审",
+        "d": "2026-06-17",
+        "done": false
+      },
+      {
+        "c": "项目交付&MP准出评审",
+        "d": "2026-07-29",
+        "done": false
+      }
+    ],
+    "statusDesc": ""
+  },
+  {
+    "id": "69a8e2638a90111ad45a57a4",
+    "name": "灵动开关PRO(带屏款)",
+    "created": "2026-03-05T01:54:43.071Z",
+    "statusName": "暂无状态",
+    "owner": "万启林",
+    "milestones": [
+      {
+        "c": "完成定标",
+        "d": "2026-02-09",
+        "done": true
+      },
+      {
+        "c": "ID FIX",
+        "d": "2026-03-20",
+        "done": true
+      },
+      {
+        "c": "产品立项会议",
+        "d": "2026-03-27",
+        "done": false
+      },
+      {
+        "c": "EVT试产物料齐套",
+        "d": "2026-04-29",
+        "done": false
+      },
+      {
+        "c": "EVT准出评审",
+        "d": "2026-06-23",
+        "done": false
+      },
+      {
+        "c": "DVT准出评审",
+        "d": "2026-07-06",
+        "done": false
+      },
+      {
+        "c": "PVT准出评审",
+        "d": "2026-07-20",
+        "done": false
+      },
+      {
+        "c": "MP物料齐套",
+        "d": "2026-07-21",
+        "done": false
+      },
+      {
+        "c": "项目交付&MP准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "DVT试产物料齐套",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "PVT试产物料齐套",
+        "d": "",
+        "done": false
+      }
+    ],
+    "statusDesc": ""
+  },
+  {
+    "id": "69892ef6702bcba4766ff052",
+    "name": "吉利灵动开关(旋钮款)",
+    "created": "2026-02-09T00:48:54.169Z",
+    "statusName": "项目停滞",
+    "owner": "万启林",
+    "milestones": [],
+    "statusDesc": "暂停"
+  },
+  {
+    "id": "6982e29c6cb8d6136c50f4ec",
+    "name": "【创维海外】KR3适配MTK 9620&9603",
+    "created": "2026-02-04T06:09:32.969Z",
+    "statusName": "暂无状态",
+    "owner": "万启林",
+    "milestones": [],
+    "statusDesc": ""
+  },
+  {
+    "id": "697c728ff754000531ca7dec",
+    "name": "低价麦克风（预研）",
+    "created": "2026-01-30T08:57:51.618Z",
+    "statusName": "暂无状态",
+    "owner": "万启林",
+    "milestones": [],
+    "statusDesc": ""
+  },
+  {
+    "id": "69776f955b0821fb32ee1464",
+    "name": "鸿蒙座舱低端麦克风",
+    "created": "2026-01-26T13:43:49.713Z",
+    "statusName": "暂无状态",
+    "owner": "石瑀",
+    "milestones": [],
+    "statusDesc": ""
+  },
+  {
+    "id": "69776f7ff754000531ca0ed8",
+    "name": "鸿蒙座舱高端麦克风",
+    "created": "2026-01-26T13:43:27.677Z",
+    "statusName": "暂无状态",
+    "owner": "石瑀",
+    "milestones": [],
+    "statusDesc": ""
+  },
+  {
+    "id": "69776f637ae5ad1ec4dd0bb5",
+    "name": "AI机器人",
+    "created": "2026-01-26T13:42:59.189Z",
+    "statusName": "暂无状态",
+    "owner": "石瑀",
+    "milestones": [],
+    "statusDesc": ""
+  },
+  {
+    "id": "6973492af367e8c8a5e46b80",
+    "name": "海外Q1Pro",
+    "created": "2026-01-23T10:10:50.985Z",
+    "statusName": "暂无状态",
+    "owner": "万启林",
+    "milestones": [],
+    "statusDesc": ""
+  },
+  {
+    "id": "6968d7bcc3f1a4ebde3475f2",
+    "name": "吉利灵动开关按键",
+    "created": "2026-01-15T12:04:12.618Z",
+    "statusName": "暂无状态",
+    "owner": "盛凯丽",
+    "milestones": [
+      {
+        "c": "PVT试产物料齐套",
+        "d": "2023-09-27",
+        "done": false
+      },
+      {
+        "c": "EVT试产物料齐套",
+        "d": "2023-10-12",
+        "done": false
+      },
+      {
+        "c": "DVT准出评审",
+        "d": "2023-10-27",
+        "done": false
+      },
+      {
+        "c": "PVT准出评审",
+        "d": "2023-11-09",
+        "done": false
+      },
+      {
+        "c": "MP物料齐套",
+        "d": "2023-11-10",
+        "done": false
+      },
+      {
+        "c": "项目交付&MP准出评审",
+        "d": "2023-11-20",
+        "done": false
+      },
+      {
+        "c": "EVT准出评审",
+        "d": "2023-12-12",
+        "done": false
+      },
+      {
+        "c": "完成定标",
+        "d": "2026-01-25",
+        "done": true
+      },
+      {
+        "c": "产品立项会议",
+        "d": "2026-01-30",
+        "done": false
+      },
+      {
+        "c": "DVT试产物料齐套",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "ID FIX",
+        "d": "",
+        "done": false
+      }
+    ],
+    "statusDesc": ""
+  },
+  {
+    "id": "69645370ee73c95fe1637908",
+    "name": "比亚迪灵动开关",
+    "created": "2026-01-12T01:50:40.411Z",
+    "statusName": "暂无状态",
+    "owner": "万启林",
+    "milestones": [
+      {
+        "c": "6.CR商业发布里程碑",
+        "d": "2026-03-30",
+        "done": false
+      },
+      {
+        "c": "1.项目立项 PI 里程碑",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "2.项目正式启动  PKO 里程碑",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "4.1 DVT试制准出评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "4.2 VP（硬测、软测、认证）里程碑",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "5.2 PVT准出评审=SR准入评审",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "3.2 EVT固件开发完成时间",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "4.3 DVT准出评审=FDF里程碑",
+        "d": "",
+        "done": false
+      }
+    ],
+    "statusDesc": ""
+  },
+  {
+    "id": "6959f695bc248ae7b6999112",
+    "name": "B-比亚迪-S3",
+    "created": "2026-01-04T05:11:49.900Z",
+    "statusName": "进度正常",
+    "owner": "万启林",
+    "milestones": [],
+    "statusDesc": "产品确认只上S3单麦版"
+  },
+  {
+    "id": "6951ec7aac233ca5bd7d7e0a",
+    "name": "Q1PRO乐器版",
+    "created": "2025-12-29T02:50:34.731Z",
+    "statusName": "暂无状态",
+    "owner": "石瑀",
+    "milestones": [],
+    "statusDesc": ""
+  },
+  {
+    "id": "694899d20e4637c8b7160cdc",
+    "name": "B-广汽-S3+G1",
+    "created": "2025-12-22T01:07:30.937Z",
+    "statusName": "暂无状态",
+    "owner": "郑雯遐",
+    "milestones": [],
+    "statusDesc": ""
+  },
+  {
+    "id": "692551feac233ca5bd76641c",
+    "name": "MS1直播麦克风（高端）",
+    "created": "2025-11-25T06:51:42.628Z",
+    "statusName": "暂无状态",
+    "owner": "石瑀",
+    "milestones": [
+      {
+        "c": "1.项目立项",
+        "d": "2026-04-17",
+        "done": true
+      },
+      {
+        "c": "3.3 EVT生产",
+        "d": "2026-06-11",
+        "done": false
+      },
+      {
+        "c": "4.1 DVT生产",
+        "d": "2026-07-18",
+        "done": false
+      },
+      {
+        "c": "3.2 全功能固件开发完成",
+        "d": "2026-07-22",
+        "done": false
+      },
+      {
+        "c": "5.2 PVT生产",
+        "d": "2026-08-31",
+        "done": false
+      },
+      {
+        "c": "6.MP生产发货",
+        "d": "2026-08-31",
+        "done": false
+      }
+    ],
+    "statusDesc": ""
+  },
+  {
+    "id": "6924122bbc248ae7b690ad67",
+    "name": "HSpace灵动开关",
+    "created": "2025-11-24T08:07:07.008Z",
+    "statusName": "暂无状态",
+    "owner": "万启林",
+    "milestones": [
+      {
+        "c": "组装",
+        "d": "2026-02-09",
+        "done": true
+      },
+      {
+        "c": "阶段准出评审",
+        "d": "2026-02-11",
+        "done": false
+      },
+      {
+        "c": "OTS提交",
+        "d": "2026-03-20",
+        "done": true
+      },
+      {
+        "c": "华为封版",
+        "d": "2026-03-25",
+        "done": false
+      },
+      {
+        "c": "组装",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "量产出货",
+        "d": "",
+        "done": false
+      }
+    ],
+    "statusDesc": ""
+  },
+  {
+    "id": "6916f6a6bc248ae7b68ed9ff",
+    "name": "引望HSpace MS11麦克风",
+    "created": "2025-11-14T09:30:14.255Z",
+    "statusName": "项目停滞",
+    "owner": "万启林",
+    "milestones": [],
+    "statusDesc": "MS11暂停，修改为U8Pro"
+  },
+  {
+    "id": "6902c0020e4637c8b70b0014",
+    "name": "深蓝Q1 U段（不喷漆版本）",
+    "created": "2025-10-30T01:31:46.412Z",
+    "statusName": "暂无状态",
+    "owner": "万启林",
+    "milestones": [
+      {
+        "c": "6.CR商业发布里程碑",
+        "d": "2025-11-28",
+        "done": false
+      },
+      {
+        "c": "软件架构 AA",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "硬件架构AA",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "1.项目立项 PI 里程碑",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "2.项目正式启动  PKO 里程碑",
+        "d": "",
+        "done": false
+      },
+      {
+        "c": "3.1 AA里程碑",
+        "d": "",
+        "done": false
+      }
+    ],
+    "statusDesc": ""
+  },
+  {
+    "id": "68ca4ef80e4637c8b70304ad",
+    "name": "阿里Q1 2.4G单支",
+    "created": "2025-09-17T06:02:32.104Z",
+    "statusName": "暂无状态",
+    "owner": "万启林",
+    "milestones": [
+      {
+        "c": "1.项目立项 PI 里程碑",
+        "d": "2025-09-16",
+        "done": true
+      },
+      {
+        "c": "2.项目正式启动  PKO 里程碑",
+        "d": "2025-09-17",
+        "done": true
+      },
+      {
+        "c": "6.CR商业发布里程碑",
+        "d": "2025-10-17",
+        "done": false
+      },
+      {
+        "c": "3.1 AA里程碑",
+        "d": "2025-10-20",
+        "done": true
+      },
+      {
+        "c": "软件架构 AA",
+        "d": "2025-10-20",
+        "done": true
+      },
+      {
+        "c": "硬件架构AA",
+        "d": "2025-10-20",
+        "done": true
+      },
+      {
+        "c": "5.2 PVT准出评审=SR准入评审",
+        "d": "",
+        "done": false
+      }
+    ],
+    "statusDesc": ""
+  },
+  {
+    "id": "689e9afc0e4637c8b7fc3eee",
+    "name": "B-长城-RT3遥控器",
+    "created": "2025-08-15T02:27:08.312Z",
+    "statusName": "暂无状态",
+    "owner": "万启林",
+    "milestones": [
+      {
+        "c": "产品立项会议",
+        "d": "2025-08-21",
+        "done": true
+      }
+    ],
+    "statusDesc": ""
+  },
+  {
+    "id": "68946ea8ee73c95fe1423d32",
+    "name": "Q1B-D 无线麦克风",
+    "created": "2025-08-07T09:15:20.501Z",
+    "statusName": "暂无状态",
+    "owner": "石瑀",
+    "milestones": [],
+    "statusDesc": ""
+  },
+  {
+    "id": "688198ca8be6929024171a8a",
+    "name": "三星U13 2.4G",
+    "created": "2025-07-24T02:22:02.785Z",
+    "statusName": "暂无状态",
+    "owner": "万启林",
+    "milestones": [
+      {
+        "c": "认证VP",
+        "d": "2026-01-06",
+        "done": false
+      },
+      {
+        "c": "DVT准出评审",
+        "d": "2026-01-16",
+        "done": false
+      },
+      {
+        "c": "CR",
+        "d": "2026-01-30",
+        "done": false
+      },
+      {
+        "c": "测试VP",
+        "d": "2026-02-09",
+        "done": false
+      },
+      {
+        "c": "SR",
+        "d": "2026-02-09",
+        "done": false
+      }
+    ],
+    "statusDesc": ""
+  },
+  {
+    "id": "68819799f4ab4da2fc744500",
+    "name": "三星Q1 2.4G",
+    "created": "2025-07-24T02:16:57.240Z",
+    "statusName": "暂无状态",
+    "owner": "万启林",
+    "milestones": [
+      {
+        "c": "软测VP",
+        "d": "2025-10-15",
+        "done": false
+      },
+      {
+        "c": "SR",
+        "d": "2025-10-16",
+        "done": false
+      },
+      {
+        "c": "认证VP",
+        "d": "2025-10-28",
+        "done": false
+      },
+      {
+        "c": "CR",
+        "d": "2025-11-20",
+        "done": false
+      }
+    ],
+    "statusDesc": ""
+  },
+  {
+    "id": "68469fc02d88fbd8540c2377",
+    "name": "奇瑞海外Q1 2.4G",
+    "created": "2025-06-09T08:48:00.243Z",
+    "statusName": "暂无状态",
+    "owner": "万启林",
+    "milestones": [],
+    "statusDesc": ""
+  },
+  {
+    "id": "683fb8bcd2192b90a916d983",
+    "name": "RT3优化项目",
+    "created": "2025-06-04T03:08:44.179Z",
+    "statusName": "暂无状态",
+    "owner": "万启林",
+    "milestones": [],
+    "statusDesc": ""
+  },
+  {
+    "id": "680af1e53e22463d328a8a7b",
+    "name": "MX1 蓝牙版",
+    "created": "2025-04-25T02:22:29.262Z",
+    "statusName": "暂无状态",
+    "owner": "石瑀",
+    "milestones": [],
+    "statusDesc": ""
+  },
+  {
+    "id": "6805e55cdffd5e6137a70456",
+    "name": "ai问答机（知之鸟）",
+    "created": "2025-04-21T06:27:40.700Z",
+    "statusName": "进度延误2周",
+    "owner": "石瑀",
+    "milestones": [
+      {
+        "c": "项目立项PI",
+        "d": "2025-04-10",
+        "done": true
+      },
+      {
+        "c": "项目正式启动PKO",
+        "d": "2025-04-25",
+        "done": true
+      },
+      {
+        "c": "AA里程碑",
+        "d": "2025-05-09",
+        "done": true
+      },
+      {
+        "c": "EVT固件开发完成",
+        "d": "2025-07-15",
+        "done": true
+      },
+      {
+        "c": "EVT试制准出评审",
+        "d": "2025-10-17",
+        "done": true
+      },
+      {
+        "c": "PPF评审（EVT准出评审）",
+        "d": "2025-10-17",
+        "done": true
+      },
+      {
+        "c": "DVT试制准出评审",
+        "d": "2025-11-28",
+        "done": false
+      },
+      {
+        "c": "FDF 里程碑（DVT准出评审）",
+        "d": "2025-12-19",
+        "done": false
+      },
+      {
+        "c": "VP（硬测、软测、认证）",
+        "d": "2025-12-22",
+        "done": false
+      },
+      {
+        "c": "SR准入（PVT准出）评审",
+        "d": "2025-12-29",
+        "done": false
+      },
+      {
+        "c": "CR商业发布",
+        "d": "2025-12-31",
+        "done": false
+      }
+    ],
+    "statusDesc": "@石瑀 石瑀，请按照以下模板填写summary "
+  },
+  {
+    "id": "67f3724061dc2b7eb9ca0856",
+    "name": "TCL partybox Q1 2.4G",
+    "created": "2025-04-07T06:35:44.704Z",
+    "statusName": "暂无状态",
+    "owner": "万启林",
+    "milestones": [],
+    "statusDesc": ""
+  },
+  {
+    "id": "67ea344424aeabad38704f6c",
+    "name": "雷克萨斯U13",
+    "created": "2025-03-31T06:20:52.967Z",
+    "statusName": "项目完结",
+    "owner": "万启林",
+    "milestones": [
+      {
+        "c": "封版",
+        "d": "2026-04-13",
+        "done": true
+      }
+    ],
+    "statusDesc": "已结束"
+  },
+  {
+    "id": "67c7a403bb3c66ee43bf181f",
+    "name": "S3国内迭代",
+    "created": "2025-03-05T01:08:19.799Z",
+    "statusName": "存在风险",
+    "owner": "石瑀",
+    "milestones": [],
+    "statusDesc": "2.4G干扰问题影响硬件定板"
+  },
+  {
+    "id": "67b2cb61f8bd4703d11c355a",
+    "name": "长城灵动开关",
+    "created": "2025-02-17T05:38:41.737Z",
+    "statusName": "进度正常",
+    "owner": "万启林",
+    "milestones": [
+      {
+        "c": "长城-PPF评审（EVT准出）",
+        "d": "2025-08-08",
+        "done": true
+      },
+      {
+        "c": "DVT试产总结",
+        "d": "2025-09-05",
+        "done": true
+      },
+      {
+        "c": "T2修模",
+        "d": "2025-09-25",
+        "done": true
+      },
+      {
+        "c": "长城封版",
+        "d": "2025-10-28",
+        "done": true
+      },
+      {
+        "c": "DV试验",
+        "d": "2025-11-06",
+        "done": true
+      },
+      {
+        "c": "DVT准出评审",
+        "d": "2025-11-06",
+        "done": true
+      },
+      {
+        "c": "长城-FDF评审(DVT准出）",
+        "d": "2025-11-06",
+        "done": true
+      },
+      {
+        "c": "SRRC认证完成",
+        "d": "2025-11-07",
+        "done": true
+      },
+      {
+        "c": "PVT准出评审",
+        "d": "2025-11-14",
+        "done": true
+      },
+      {
+        "c": "长城-SR准入评审（PVT准出）",
+        "d": "2025-11-14",
+        "done": true
+      },
+      {
+        "c": "剩余订单出货",
+        "d": "2025-11-21",
+        "done": true
+      },
+      {
+        "c": "长城-CR",
+        "d": "2026-03-13",
+        "done": true
+      }
+    ],
+    "statusDesc": "请项目经理每周五对项目状态进行更新，模板可以参照以下，或者自行概括。\n目前项目进度________，下一个里程碑是_____\nif有需要上报的风险，填写：_______________\n\nif 延误≥2周\n由于以下原因引起延误\n1. 原因1         delay几周     目前问题已经解决，or 解决方案是___who在解决what, when 计划解决________\n2. 原因2         delay几周     目前问题已经解决，or 解决方案是___who在解决what, when 计划解决________"
+  },
+  {
+    "id": "6657d691a86f837e07c2660a",
+    "name": "喇叭麦标准版M5-(K22MIC01-LS-B）",
+    "created": "2024-05-30T01:29:53.597Z",
+    "statusName": "进度正常",
+    "owner": "石瑀",
+    "milestones": [
+      {
+        "c": "量产首单交付",
+        "d": "2025-05-26",
+        "done": true
+      }
+    ],
+    "statusDesc": "1.1K备料除了毛绒套和咪芯以外5-12号齐套\n2.咪芯4-28寄出2套样品确认"
+  },
+  {
+    "id": "6647292bfbc9cb5265eeca31",
+    "name": "RT3车载遥控器（K24KPA02-HW-A）",
+    "created": "2024-05-17T09:53:47.209Z",
+    "statusName": "进度正常",
+    "owner": "万启林",
+    "milestones": [
+      {
+        "c": "KO会议",
+        "d": "2024-06-25",
+        "done": true
+      },
+      {
+        "c": "产品立项会议",
+        "d": "2024-06-25",
+        "done": true
+      },
+      {
+        "c": "需求评审",
+        "d": "2024-06-25",
+        "done": true
+      },
+      {
+        "c": "ID FIX",
+        "d": "2024-07-03",
+        "done": true
+      },
+      {
+        "c": "EVT准出评审",
+        "d": "2024-08-20",
+        "done": true
+      },
+      {
+        "c": "DVT准出评审",
+        "d": "2024-09-30",
+        "done": true
+      },
+      {
+        "c": "PVT准出评审",
+        "d": "2024-11-01",
+        "done": true
+      },
+      {
+        "c": "MP阶段准出评审",
+        "d": "2024-11-15",
+        "done": true
+      }
+    ],
+    "statusDesc": "岚图\n1、软件任务：1）U13/U10/华为二代调音，协调整车\n2、硬件任务：无\n3、结构任务：无\n4、测试任务：1）炉石测试-TBD\n5、认证任务：无\n6、包材任务：无\n7、备料及交付：无\n8、生产排期：无\n9、质量任务：PPAP资料提交和审核-11/18\n10、风险上报：无"
+  },
+  {
+    "id": "6646fcf3fbc9cb5265eec8a3",
+    "name": "华为二代K24MIC03(MS10)-HW-A",
+    "created": "2024-05-17T06:45:07.204Z",
+    "statusName": "存在风险",
+    "owner": "石瑀",
+    "milestones": [
+      {
+        "c": "产品立项会议",
+        "d": "2024-04-16",
+        "done": true
+      },
+      {
+        "c": "KO会议",
+        "d": "2024-04-25",
+        "done": true
+      },
+      {
+        "c": "模具tooling",
+        "d": "2024-06-04",
+        "done": true
+      },
+      {
+        "c": "模具T0",
+        "d": "2024-06-28",
+        "done": true
+      },
+      {
+        "c": "EVT准出评审",
+        "d": "2024-07-01",
+        "done": true
+      },
+      {
+        "c": "DVT软件发布",
+        "d": "2024-07-01",
+        "done": true
+      },
+      {
+        "c": "DVT贴片完成",
+        "d": "2024-07-04",
+        "done": true
+      },
+      {
+        "c": "DVT组装完成",
+        "d": "2024-07-09",
+        "done": true
+      },
+      {
+        "c": "DVT2组装",
+        "d": "2024-07-28",
+        "done": true
+      },
+      {
+        "c": "DVT准出评审",
+        "d": "2024-08-23",
+        "done": true
+      },
+      {
+        "c": "PVT软件发布",
+        "d": "2024-08-23",
+        "done": true
+      },
+      {
+        "c": "PVT贴片",
+        "d": "2024-08-27",
+        "done": true
+      },
+      {
+        "c": "PVT组装",
+        "d": "2024-08-31",
+        "done": true
+      },
+      {
+        "c": "PVT准出评审",
+        "d": "2024-09-11",
+        "done": true
+      },
+      {
+        "c": "MP生产",
+        "d": "2024-09-24",
+        "done": true
+      },
+      {
+        "c": "MP准出评审",
+        "d": "2024-10-10",
+        "done": true
+      },
+      {
+        "c": "PCN软件版本提测",
+        "d": "2024-12-12",
+        "done": true
+      },
+      {
+        "c": "PCN版本转测",
+        "d": "2024-12-31",
+        "done": true
+      },
+      {
+        "c": "PCN版本硬件试产发板",
+        "d": "2025-03-11",
+        "done": true
+      },
+      {
+        "c": "PCN版本软件提测",
+        "d": "2025-04-18",
+        "done": true
+      }
+    ],
+    "statusDesc": "1. 麦克风原计划贴片27号完成寄出，4-24通知暂停验证不用ADC方案，导致延期一天，目前计划4-28寄出\n2. 原计划是4-11提测首个版本，实际4-17开始测试（测试目前只有一个人力）（原始计划是3-19提测，后面因为软件开发原因分别延期到3-28,4-2,4-11三个时间，至到4-17才开始测试）\n3. beta启动：客户目前反馈还没有启动招募，改到节后启动（内部保证版本质量）\n4. 新的组装计划：5-6号"
+  },
+  {
+    "id": "64229a4ef407a6bb9ca1459d",
+    "name": "阿维塔Q1双支",
+    "created": "2023-03-28T07:42:06.462Z",
+    "statusName": "进度正常",
+    "owner": "万启林",
+    "milestones": [],
+    "statusDesc": "1. 测试一下\n2. 测试一下\n3. 测试一下"
+  }
+];
+const today = new Date('2026-09-26');
+
+const ownerMap = {
+  '郑雯遐': 'owner-zheng',
+  '黄成东': 'owner-huang',
+  '石瑀': 'owner-shi',
+  '万启林': 'owner-wan',
+  '李潘婷': 'owner-li',
+  '盛凯丽': 'owner-sheng',
+  '直接': 'owner-direct'
+};
+
+function statusBadge(s) {
+  if (s === '进度正常') return '<span class="badge badge-normal">进度正常</span>';
+  if (s === '存在风险') return '<span class="badge badge-risk">存在风险</span>';
+  if (s === '进度延误2周') return '<span class="badge badge-delay">延误2周</span>';
+  if (s === '项目完结') return '<span class="badge badge-done">已完结</span>';
+  if (s === '项目暂停') return '<span class="badge badge-pause">已暂停</span>';
+  if (s === '项目停滞') return '<span class="badge badge-stall">已停滞</span>';
+  return '<span class="badge badge-none">—</span>';
+}
+
+function milestoneCell(p) {
+  if (!p.milestones || p.milestones.length === 0) {
+    return '<span class="ms-none-text">—</span>';
+  }
+  var cur = null;
+  for (var i = 0; i < p.milestones.length; i++) {
+    if (!p.milestones[i].done) { cur = p.milestones[i]; break; }
+  }
+  if (!cur) return '<span class="ms-none-text">—</span>';
+  var name = '✓ ' + cur.c;
+  return `<span class="ms-name" title="${cur.c}">${name}</span>`;
+}
+
+function dateCell(p) {
+  if (!p.milestones || p.milestones.length === 0) return '<span class="ms-none-text">—</span>';
+  var cur = null;
+  for (var i = 0; i < p.milestones.length; i++) {
+    if (!p.milestones[i].done) { cur = p.milestones[i]; break; }
+  }
+  if (!cur || !cur.d) return '<span class="ms-none-text">—</span>';
+  let cls = 'ms-date';
+  const d = new Date(cur.d);
+  const diff = (d - today) / 86400000;
+  if (diff < 0 && !cur.done) cls += ' ms-overdue';
+  else if (diff <= 14 && !cur.done) cls += ' ms-soon';
+  return `<span class="${cls}">${cur.d}</span>`;
+}
+
+function render(list) {
+  let html = '';
+  let lastYear = '';
+  let idx = 0;
+  list.forEach((p) => {
+    idx++;
+    const year = p.created.substring(0, 4);
+    if (year !== lastYear) {
+      lastYear = year;
+      const yearCount = list.filter(x => x.created.substring(0,4) === year).length;
+      html += '<tr class="year-row"><td colspan="10">' + year + ' 年<span class="year-count">' + yearCount + ' 个项目</span></td></tr>';
+    }
+    const oc = ownerMap[p.owner] || 'owner-direct';
+    // Compute next milestone: first incomplete after current milestone
+    var nextMs = '无';
+    var nextMsDone = false;
+    if (p.milestones && p.milestones.length > 0) {
+      // Find current milestone index (first incomplete)
+      var curIdx = -1;
+      for (var i = 0; i < p.milestones.length; i++) {
+        if (!p.milestones[i].done) { curIdx = i; break; }
+      }
+      // Find next incomplete after current
+      var nextMsDate = '';
+      for (var j = curIdx + 1; j < p.milestones.length; j++) {
+        if (!p.milestones[j].done) {
+          nextMs = p.milestones[j].c;
+          nextMsDone = p.milestones[j].done;
+          nextMsDate = p.milestones[j].d || '';
+          break;
+        }
+      }
+    }
+    var lastMsHtml = nextMs === '无' ? '<span class="ms-none-text">—</span>' :
+      (nextMsDone ? '<span class="status-normal">✓ ' + nextMs + '</span>' : nextMs);
+    // Build tooltip data
+    var ttData = { name: p.name, milestones: p.milestones || [], statusDesc: p.statusDesc || '' };
+    var nextMsDateHtml = '<span class="ms-none-text">—</span>';
+    if (nextMsDate) {
+      var nd = new Date(nextMsDate);
+      var ndiff = (nd - today) / 86400000;
+      var ncls = 'ms-date';
+      if (ndiff < 0) ncls += ' ms-overdue';
+      else if (ndiff <= 14) ncls += ' ms-soon';
+      nextMsDateHtml = '<span class="' + ncls + '">' + nextMsDate + '</span>';
+    }
+    html += '<tr class="proj-row" data-url="https://www.teambition.com/project/' + p.id + '" data-tt="' + JSON.stringify(ttData).replace(/"/g, '&quot;') + '">' +
+      '<td style="color:#9ca3af">' + idx + '</td>' +
+      '<td class="proj-name"><a href="https://www.teambition.com/project/' + p.id + '" target="_blank" class="proj-link">' + p.name + '</a></td>' +
+      '<td>' + statusBadge(p.statusName) + '</td>' +
+      '<td class="status-desc-cell" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:#6b7280" title="">' + (p.statusDesc ? p.statusDesc.substring(0,50) : '—') + '</td>' +
+      '<td>' + milestoneCell(p) + '</td>' +
+      '<td>' + dateCell(p) + '</td>' +
+      '<td><span class="ms-name" title="' + nextMs + '">' + lastMsHtml + '</span></td>' +
+      '<td style="font-variant-numeric:tabular-nums;font-size:13px">' + nextMsDateHtml + '</td>' +
+      '<td><span style="font-size:13px;color:#374151">' + p.owner + '</span></td>' +
+      '<td style="font-variant-numeric:tabular-nums;color:#6b7280;font-size:13px">' + p.created.substring(0,10) + '</td>' +
+    '</tr>';
+  });
+  document.getElementById('tbody').innerHTML = html;
+  var tooltip = document.getElementById('rowTooltip');
+  document.querySelectorAll('.proj-row').forEach(function(row) {
+    row.addEventListener('dblclick', function(e) {
+      if (e.target.tagName === 'A') return;
+      window.open(this.dataset.url, '_blank');
+    });
+    row.addEventListener('mouseover', function(e) {
+      var d = JSON.parse(this.dataset.tt);
+      var h = '';
+      var descCell = e.target.closest('.status-desc-cell');
+      if (descCell && d.statusDesc) {
+        h = '<div class="tt-title">' + d.name + ' - 状态描述</div>';
+        h += '<div class="tt-item" style="white-space:normal;max-width:400px;line-height:1.5">' + d.statusDesc + '</div>';
+      } else {
+        h = '<div class="tt-title">' + d.name + '</div>';
+        var ms = d.milestones.slice().sort(function(a,b) {
+          return (a.d || '').localeCompare(b.d || '');
+        });
+        if (ms.length > 0) {
+          ms.forEach(function(m) {
+            var cls = m.done ? 'tt-item tt-done' : 'tt-item';
+            h += '<div class="' + cls + '"><span>' + m.c + '</span><span class="tt-date">' + (m.d || '—') + '</span></div>';
+          });
+        } else {
+          h += '<div class="tt-item"><span>暂无里程碑</span></div>';
+        }
+      }
+      tooltip.innerHTML = h;
+      tooltip.style.display = 'block';
+    });
+    row.addEventListener('mousemove', function(e) {
+      var x = e.clientX + 14, y = e.clientY + 14;
+      if (x + tooltip.offsetWidth > window.innerWidth - 10) x = e.clientX - tooltip.offsetWidth - 14;
+      if (y + tooltip.offsetHeight > window.innerHeight - 10) y = e.clientY - tooltip.offsetHeight - 14;
+      tooltip.style.left = x + 'px';
+      tooltip.style.top = y + 'px';
+    });
+    row.addEventListener('mouseleave', function() {
+      tooltip.style.display = 'none';
+    });
+  });
+}
+
+function renderStats(list) {
+  list = list || projects;
+  const total = list.length;
+  const noStatus = list.filter(p => p.statusName === '暂无状态').length;
+  const risk = list.filter(p => p.statusName.includes('风险') || p.statusName.includes('延误')).length;
+  const done = list.filter(p => p.statusName === '项目完结').length;
+  const normal = list.filter(p => p.statusName === '进度正常').length;
+  const paused = list.filter(p => p.statusName === '项目暂停' || p.statusName === '项目停滞').length;
+  function pct(n) { return total > 0 ? Math.round(n/total*100) + '%' : '0%'; }
+  document.getElementById('statsRow').innerHTML =
+    '<div class="stat-card total stat-click" data-sfilter="all"><div class="num">'+total+'</div><div class="label">项目总数</div></div>' +
+    '<div class="stat-card normal stat-click" data-sfilter="normal"><div class="num">'+normal+' <span class="pct">'+pct(normal)+'</span></div><div class="label">进度正常</div></div>' +
+    '<div class="stat-card risk stat-click" data-sfilter="risk"><div class="num">'+risk+' <span class="pct">'+pct(risk)+'</span></div><div class="label">风险/延误</div></div>' +
+    '<div class="stat-card paused stat-click" data-sfilter="paused"><div class="num">'+paused+' <span class="pct">'+pct(paused)+'</span></div><div class="label">暂停/停滞</div></div>' +
+    '<div class="stat-card done stat-click" data-sfilter="done"><div class="num">'+done+' <span class="pct">'+pct(done)+'</span></div><div class="label">已完结</div></div>' +
+    '<div class="stat-card nostatus stat-click" data-sfilter="nostatus" style="background:#f5f3ff"><div class="num" style="color:#8b5cf6">'+noStatus+' <span class="pct" style="color:#8b5cf6">'+pct(noStatus)+'</span></div><div class="label">未设置状态</div></div>';
+  document.querySelectorAll('.stat-click').forEach(card => {
+    card.addEventListener('click', function() {
+      var f = this.dataset.sfilter;
+      currentFilter = f;
+      sortKey = null;
+      sortDir = 'asc';
+      document.querySelectorAll('.filter-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.filter === f);
+      });
+      applyFilter();
+    });
+  });
+}
+
+let currentFilter = 'all';
+let currentYear = '2026';
+
+function renderYearTabs() {
+  const years = [...new Set(projects.map(p => p.created.substring(0,4)))].sort().reverse();
+  const container = document.getElementById('yearTabs');
+  let html = '<button class="year-tab' + (currentYear==='all'?' active':'') + '" data-year="all">全部年份<span class="cnt">' + projects.length + '</span></button>';
+  years.forEach(y => {
+    const cnt = projects.filter(p => p.created.substring(0,4) === y).length;
+    html += '<button class="year-tab' + (currentYear===y?' active':'') + '" data-year="' + y + '">' + y + '<span class="cnt">' + cnt + '</span></button>';
+  });
+  container.innerHTML = html;
+  container.querySelectorAll('.year-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentYear = btn.dataset.year;
+      sortKey = null;
+      sortDir = 'asc';
+      renderYearTabs();
+      applyFilter();
+    });
+  });
+}
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.filter;
+    sortKey = null;
+    sortDir = 'asc';
+    applyFilter();
+  });
+});
+document.getElementById('searchBox').addEventListener('input', function() {
+  document.getElementById('searchClear').style.display = this.value ? 'block' : 'none';
+  applyFilter();
+});
+
+var sortKey = null, sortDir = 'asc';
+function getSortVal(p, key) {
+  switch(key) {
+    case 'name': return p.name || '';
+    case 'status': return p.statusName || '';
+    case 'statusDesc': return p.statusDesc || '';
+    case 'owner': return p.owner || '';
+    case 'created': return p.created || '';
+    case 'curMsName': {
+      var cur = '';
+      if (p.milestones) { for (var i=0;i<p.milestones.length;i++) { if(!p.milestones[i].done) { cur = p.milestones[i].c||''; break; } } }
+      return cur;
+    }
+    case 'curMs': {
+      var cur = '';
+      if (p.milestones) { for (var i=0;i<p.milestones.length;i++) { if(!p.milestones[i].done) { cur = p.milestones[i].d||''; break; } } }
+      return cur;
+    }
+    case 'nextMsName': {
+      var curIdx = -1;
+      if (p.milestones) {
+        for (var i=0;i<p.milestones.length;i++) { if(!p.milestones[i].done) { curIdx=i; break; } }
+        for (var j=curIdx+1;j<p.milestones.length;j++) { if(!p.milestones[j].done) return p.milestones[j].c||''; }
+      }
+      return '';
+    }
+    case 'nextMs': {
+      var curIdx = -1;
+      if (p.milestones) {
+        for (var i=0;i<p.milestones.length;i++) { if(!p.milestones[i].done) { curIdx=i; break; } }
+        for (var j=curIdx+1;j<p.milestones.length;j++) { if(!p.milestones[j].done) return p.milestones[j].d||''; }
+      }
+      return '';
+    }
+    default: return '';
+  }
+}
+function applyFilter() {
+  const q = document.getElementById('searchBox').value.toLowerCase();
+  let list = projects;
+  if (currentYear !== 'all') list = list.filter(p => p.created.substring(0,4) === currentYear);
+  if (currentFilter === 'risk') list = list.filter(p => p.statusName.includes('风险') || p.statusName.includes('延误'));
+  else if (currentFilter === 'active') list = list.filter(p => !['项目完结','项目暂停','项目停滞'].includes(p.statusName));
+  else if (currentFilter === 'done') list = list.filter(p => p.statusName === '项目完结');
+  else if (currentFilter === 'normal') list = list.filter(p => p.statusName === '进度正常');
+  else if (currentFilter === 'paused') list = list.filter(p => p.statusName === '项目暂停' || p.statusName === '项目停滞');
+  else if (currentFilter === 'nostatus') list = list.filter(p => p.statusName === '暂无状态');
+  if (q) list = list.filter(p =>
+    p.name.toLowerCase().includes(q) ||
+    (p.milestones||[]).some(m => m.c.toLowerCase().includes(q)) ||
+    p.owner.toLowerCase().includes(q)
+  );
+  if (sortKey) {
+    list = list.slice().sort(function(a,b) {
+      var va = getSortVal(a, sortKey), vb = getSortVal(b, sortKey);
+      if (va < vb) return sortDir === 'asc' ? -1 : 1;
+      if (va > vb) return sortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
+  } else {
+    list = list.slice().sort(function(a,b) {
+      return (b.created || '').localeCompare(a.created || '');
+    });
+  }
+  renderStats(list);
+  render(list);
+}
+document.querySelectorAll('th[data-sort]').forEach(function(th) {
+  th.style.cursor = 'pointer';
+  th.addEventListener('click', function() {
+    var key = th.dataset.sort;
+    if (sortKey === key) { sortDir = sortDir === 'asc' ? 'desc' : 'asc'; }
+    else { sortKey = key; sortDir = 'asc'; }
+    document.querySelectorAll('th[data-sort]').forEach(function(t) { t.textContent = t.textContent.replace(/ [\u25B2\u25BC]$/, ''); });
+    th.textContent = th.textContent + (sortDir === 'asc' ? ' \u25B2' : ' \u25BC');
+    applyFilter();
+  });
+});
+
+// Listen for fresh data from bookmarklet
+window.addEventListener('message', function(e) {
+  try {
+    var data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
+    if (Array.isArray(data) && data.length > 0 && data[0].id) {
+      projects = data;
+      renderYearTabs();
+      applyFilter();
+    }
+  } catch(err) {}
+});
+
+renderYearTabs();
+applyFilter();
+</script>
+</body>
+</html>
+<!-- （注：内容由AI生成） -->
