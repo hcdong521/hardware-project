@@ -268,7 +268,7 @@
 <div class="header">
   <h1>炉石项目集 · 硬件项目全景</h1>
   <div class="subtitle">按创建年份倒序分组</div>
-  <div class="meta">数据更新：2026-11-10</div>
+  <div class="meta">数据更新：2026-11-11</div>
 </div>
 
 <div class="stats-row" id="statsRow"></div>
@@ -313,73 +313,12 @@
 const projects = [
   {
     "id": "6aed7c896cb8d6136c6804e4",
-    "name": "海外项目变更维护",
+    "name": "海外-喇叭麦",
     "created": "2026-11-06T07:06:49.096Z",
     "owner": "李潘婷",
-    "statusName": "暂无状态",
-    "statusDesc": "",
-    "milestones": [
-      {
-        "c": "完成定标",
-        "d": "2026-02-09",
-        "done": true
-      },
-      {
-        "c": "喇叭麦新调音版本固件测试",
-        "d": "2026-11-12",
-        "done": false
-      },
-      {
-        "c": "产品立项会议",
-        "d": "",
-        "done": false
-      },
-      {
-        "c": "项目交付&MP准出评审",
-        "d": "",
-        "done": false
-      },
-      {
-        "c": "DVT试产物料齐套",
-        "d": "",
-        "done": false
-      },
-      {
-        "c": "DVT准出评审",
-        "d": "",
-        "done": false
-      },
-      {
-        "c": "PVT准出评审",
-        "d": "",
-        "done": false
-      },
-      {
-        "c": "MP物料齐套",
-        "d": "",
-        "done": false
-      },
-      {
-        "c": "ID FIX",
-        "d": "",
-        "done": false
-      },
-      {
-        "c": "EVT试产物料齐套",
-        "d": "",
-        "done": false
-      },
-      {
-        "c": "EVT准出评审",
-        "d": "",
-        "done": false
-      },
-      {
-        "c": "PVT试产物料齐套",
-        "d": "",
-        "done": false
-      }
-    ]
+    "statusName": "进度正常",
+    "statusDesc": "老款喇叭麦存在低频啸叫问题，已重新调音，预计11/12进行固件测试发布",
+    "milestones": []
   },
   {
     "id": "6ad17ecf8a90111ad46d0abf",
@@ -590,13 +529,29 @@ const projects = [
     "owner": "石瑀",
     "statusName": "存在风险",
     "statusDesc": "1. 海外FCC认证fail项较多，预计周四给出整改复测结果\n2. 修改语音播报版本提测11-11\n3. 包装方案确认11-11\n4. 海外APP测试上线11-17",
-    "milestones": []
+    "milestones": [
+      {
+        "c": "包装图档确认",
+        "d": "2026-11-12",
+        "done": false
+      },
+      {
+        "c": "MS1海外生产",
+        "d": "2026-11-25",
+        "done": false
+      },
+      {
+        "c": "FCC认证完成",
+        "d": "2026-11-27",
+        "done": false
+      }
+    ]
   },
   {
     "id": "6a99447713e121404f0551fc",
     "name": "H-特斯拉灵动开关",
     "created": "2026-09-03T09:57:11.380Z",
-    "owner": "黄成东",
+    "owner": "石瑀",
     "statusName": "进度正常",
     "statusDesc": "APP上架、软著跟踪中",
     "milestones": [
@@ -870,8 +825,8 @@ const projects = [
     "name": "C-特斯拉U13",
     "created": "2026-08-19T10:10:47.829Z",
     "owner": "李潘婷",
-    "statusName": "暂无状态",
-    "statusDesc": "",
+    "statusName": "进度正常",
+    "statusDesc": "1. 海外U13已正常生产出货\n2. 国内U13正在进行BOM变更后备料排期生产",
     "milestones": [
       {
         "c": "产品立项会议",
@@ -880,11 +835,6 @@ const projects = [
       },
       {
         "c": "项目交付&MP准出评审",
-        "d": "",
-        "done": false
-      },
-      {
-        "c": "MP物料齐套",
         "d": "",
         "done": false
       }
@@ -1607,7 +1557,7 @@ const projects = [
       {
         "c": "产品立项会议",
         "d": "2026-04-16",
-        "done": false
+        "done": true
       },
       {
         "c": "EVT准出评审",
@@ -1617,16 +1567,16 @@ const projects = [
       {
         "c": "DVT试产物料齐套",
         "d": "2026-05-12",
-        "done": false
+        "done": true
       },
       {
         "c": "DVT准出评审",
         "d": "2026-06-17",
-        "done": false
+        "done": true
       },
       {
         "c": "项目交付&MP准出评审",
-        "d": "2026-07-29",
+        "d": "2026-12-09",
         "done": false
       }
     ]
@@ -2354,26 +2304,31 @@ const projects = [
       {
         "c": "DVT试制准出评审",
         "d": "2025-11-28",
-        "done": false
+        "done": true
       },
       {
         "c": "FDF 里程碑（DVT准出评审）",
         "d": "2025-12-19",
-        "done": false
+        "done": true
       },
       {
         "c": "VP（硬测、软测、认证）",
         "d": "2025-12-22",
-        "done": false
+        "done": true
       },
       {
         "c": "SR准入（PVT准出）评审",
         "d": "2025-12-29",
-        "done": false
+        "done": true
       },
       {
         "c": "CR商业发布",
         "d": "2025-12-31",
+        "done": true
+      },
+      {
+        "c": "知之鸟迭代二完成",
+        "d": "2026-11-16",
         "done": false
       }
     ]
@@ -2706,7 +2661,7 @@ const projects = [
     "milestones": []
   }
 ];
-const today = new Date('2026-11-10');
+const today = new Date('2026-11-11');
 
 const ownerMap = {
   '郑雯遐': 'owner-zheng',
