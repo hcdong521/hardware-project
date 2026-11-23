@@ -268,7 +268,7 @@
 <div class="header">
   <h1>炉石项目集 · 硬件项目全景</h1>
   <div class="subtitle">按创建年份倒序分组</div>
-  <div class="meta">数据更新：2026-11-22</div>
+  <div class="meta">数据更新：2026-11-23</div>
 </div>
 
 <div class="stats-row" id="statsRow"></div>
@@ -731,7 +731,7 @@ const projects = [
     "name": "MS1海外版本",
     "created": "2026-09-08T11:06:17.916Z",
     "statusName": "存在风险",
-    "statusDesc": "1. 海外FCC认证二次复测fail项整改，认证时间有风险（和长才沟通可以先上线，但是PCB可能涉及变更）\n2. 语音播报延期：预计要11-20 提供音频文件，然后再提测版本\n3. 海外APP测试中，预计下周11-27提交审核上线\n4. 包装BOM已归档，彩盒安排备料，说明书图档预计下周输出",
+    "statusDesc": "海外上线直接使用V1.1.4版本迭代的版本，APP需要再12-3之前提交上线，12-10之前审核完成，固件需要再12-7发布",
     "owner": "石瑀",
     "milestones": [
       {
@@ -746,7 +746,7 @@ const projects = [
       },
       {
         "c": "MS1海外生产",
-        "d": "2026-12-02",
+        "d": "2026-12-07",
         "done": false
       }
     ]
@@ -1313,11 +1313,6 @@ const projects = [
         "done": false
       },
       {
-        "c": "全功能版本提测",
-        "d": "2026-08-18",
-        "done": false
-      },
-      {
         "c": "模具开模沟通",
         "d": "2026-08-21",
         "done": false
@@ -1345,6 +1340,11 @@ const projects = [
       {
         "c": "DEMO功能演示版本",
         "d": "2026-10-19",
+        "done": false
+      },
+      {
+        "c": "3322首版开发",
+        "d": "2026-12-18",
         "done": false
       }
     ]
@@ -1776,7 +1776,7 @@ const projects = [
     "name": "ai问答机（知之鸟PRO）",
     "created": "2026-03-13T05:42:38.030Z",
     "statusName": "存在风险",
-    "statusDesc": "[图片] \n优先满足知之鸟PRO上线",
+    "statusDesc": "项目上线节点更新：原12-9调整为12-16",
     "owner": "石瑀",
     "milestones": [
       {
@@ -1815,8 +1815,13 @@ const projects = [
         "done": true
       },
       {
-        "c": "项目交付&MP准出评审",
-        "d": "2026-12-09",
+        "c": "软件封版",
+        "d": "2026-12-13",
+        "done": false
+      },
+      {
+        "c": "知之鸟PRO上线组装生产",
+        "d": "2026-12-16",
         "done": false
       }
     ]
@@ -2178,7 +2183,7 @@ const projects = [
     "name": "MS1直播麦克风（高端）",
     "created": "2025-11-25T06:51:42.628Z",
     "statusName": "延期风险",
-    "statusDesc": "1.1.1.3 版本迭代版本提测，11-26上线（进度正常）\n2.国内APP上线，版本测试OK，但提交审核需要备案（重新备案需要20工作日），之前目标IOS上线 是11-26（会延期）\n3.1.1.4 版本迭代需求对齐，11-30需要输出迭代后UI",
+    "statusDesc": "[图片] \n国内如果因为备案问题12-10 无法上线，但是研发状态需要达到上线状态",
     "owner": "石瑀",
     "milestones": [
       {
@@ -2540,7 +2545,7 @@ const projects = [
     "name": "ai问答机（知之鸟）",
     "created": "2025-04-21T06:27:40.700Z",
     "statusName": "进度正常",
-    "statusDesc": "[图片] \n确认优先满足知之鸟PRO上线",
+    "statusDesc": "一代扣子迁移里程碑按照11-20会议记录节点更新，调整里程碑节点27年1月19号完成迁移上线",
     "owner": "石瑀",
     "milestones": [
       {
@@ -2605,17 +2610,17 @@ const projects = [
       },
       {
         "c": "Tools版本",
-        "d": "2026-12-04",
-        "done": false
-      },
-      {
-        "c": "自研版本测试完成",
         "d": "2026-12-25",
         "done": false
       },
       {
+        "c": "自研版本测试完成",
+        "d": "2027-01-14",
+        "done": false
+      },
+      {
         "c": "版本上线",
-        "d": "2026-12-29",
+        "d": "2027-01-19",
         "done": false
       }
     ]
@@ -2948,7 +2953,7 @@ const projects = [
     "milestones": []
   }
 ];
-const today = new Date('2026-11-22');
+const today = new Date('2026-11-23');
 
 const ownerMap = {
   '郑雯遐': 'owner-zheng',
